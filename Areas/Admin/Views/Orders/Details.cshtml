@@ -1,0 +1,111 @@
+@model Order
+@{
+    var nextStatuses = OrderStatus.NextStatuses(Model.OrderStatus);
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <div>
+        <a asp-action="Index" class="small text-muted"><i class="bi bi-arrow-left"></i> Danh sách đơn hàng</a>
+        <h4 class="mb-0 mt-1">
+            Đơn hàng @Model.OrderCode
+            <span class="badge fs-6 @OrderStatus.BadgeClass(Model.OrderStatus)">@Model.OrderStatus</span>
+        </h4>
+        <div class="small text-muted">
+            Đặt lúc @FormatHelper.DateTime(Model.CreatedAt)
+            @if (Model.UpdatedAt != null)
+            {
+                <span> · Cập nhật @FormatHelper.DateTime(Model.UpdatedAt)</span>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="admin-card">
+            <h5>Sản phẩm</h5>
+            <partial name="_OrderItems" model="Model" />
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Note))
+        {
+            <div class="admin-card">
+                <h5>Ghi chú của khách</h5>
+                <div>@Model.Note</div>
+            </div>
+        }
+    </div>
+
+    <div class="col-lg-4">
+        <div class="admin-card">
+            <h5>Cập nhật trạng thái</h5>
+            @if (nextStatuses.Length == 0)
+            {
+                <div class="text-muted small">Đơn hàng đã kết thúc, không thể đổi trạng thái.</div>
+            }
+            else
+            {
+                <div class="d-grid gap-2">
+                    @foreach (var s in nextStatuses)
+                    {
+                        bool isCancel = s == OrderStatus.Cancelled;
+                        <form asp-action="UpdateStatus" asp-route-id="@Model.OrderId" method="post"
+                              data-confirm="@(isCancel ? "Hủy đơn hàng và hoàn lại tồn kho?" : $"Chuyển đơn sang \"{s}\"?")">
+                            <input type="hidden" name="status" value="@s" />
+                            <button class="btn w-100 @(isCancel ? "btn-outline-danger" : "btn-dark")">
+                                @(isCancel ? "Hủy đơn hàng" : "→ " + s)
+                            </button>
+                        </form>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="admin-card">
+            <h5>Thanh toán</h5>
+            <div class="mb-1">@PaymentMethods.DisplayName(Model.PaymentMethod)</div>
+            <div class="mb-3">
+                Trạng thái:
+                <span class="badge @(Model.PaymentStatus == PaymentStatus.Paid ? "bg-success" : "bg-secondary")">@Model.PaymentStatus</span>
+                @if (Model.Payment?.PaidAt != null)
+                {
+                    <div class="small text-muted">Thanh toán lúc @FormatHelper.DateTime(Model.Payment.PaidAt)</div>
+                }
+            </div>
+
+            <form asp-action="UpdatePayment" asp-route-id="@Model.OrderId" method="post" class="d-flex gap-2">
+                <select name="paymentStatus" class="form-select form-select-sm">
+                    @foreach (var ps in new[] { PaymentStatus.Unpaid, PaymentStatus.Paid, PaymentStatus.Refunded })
+                    {
+                        <option value="@ps" selected="@(ps == Model.PaymentStatus)">@ps</option>
+                    }
+                </select>
+                <button class="btn btn-sm btn-outline-dark text-nowrap">Cập nhật</button>
+            </form>
+        </div>
+
+        <div class="admin-card">
+            <h5>Khách hàng</h5>
+            <div class="fw-semibold">@Model.User.FullName</div>
+            <div class="small text-muted">@Model.User.Username · @Model.User.Email</div>
+            @if (!string.IsNullOrEmpty(Model.User.Phone))
+            {
+                <div class="small">@Model.User.Phone</div>
+            }
+            <a asp-controller="Users" asp-action="Details" asp-route-id="@Model.UserId" class="small">Xem khách hàng</a>
+        </div>
+
+        <div class="admin-card">
+            <h5>Giao hàng</h5>
+            @if (Model.Address != null)
+            {
+                <div class="fw-semibold">@Model.Address.ReceiverName · @Model.Address.Phone</div>
+                <div class="small text-muted">@Model.Address.AddressDetail, @Model.Address.Ward, @Model.Address.District, @Model.Address.Province</div>
+            }
+            else
+            {
+                <div class="text-muted small">Không có địa chỉ</div>
+            }
+        </div>
+    </div>
+</div>

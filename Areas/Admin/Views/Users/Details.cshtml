@@ -1,0 +1,85 @@
+@model User
+@{
+    bool isSelf = Model.UserId == (int)ViewBag.CurrentUserId;
+    var orders = Model.Orders.OrderByDescending(o => o.CreatedAt).ToList();
+    decimal totalSpent = orders.Where(o => o.PaymentStatus == PaymentStatus.Paid).Sum(o => o.TotalAmount);
+}
+
+<a asp-action="Index" class="small text-muted"><i class="bi bi-arrow-left"></i> Danh sách người dùng</a>
+
+<div class="row g-4 mt-1">
+    <div class="col-lg-4">
+        <div class="admin-card">
+            <h5>Thông tin tài khoản</h5>
+            <div class="fs-5 fw-semibold">@Model.FullName</div>
+            <div class="text-muted mb-3">@Model.Username · @Model.Role.RoleName</div>
+
+            <table class="table table-sm mb-3">
+                <tr><td class="text-muted">Email</td><td>@Model.Email</td></tr>
+                <tr><td class="text-muted">SĐT</td><td>@Model.Phone</td></tr>
+                <tr><td class="text-muted">Giới tính</td><td>@Model.Gender</td></tr>
+                <tr><td class="text-muted">Ngày sinh</td><td>@Model.DateOfBirth?.ToString("dd/MM/yyyy")</td></tr>
+                <tr><td class="text-muted">Ngày tạo</td><td>@Model.CreatedAt.ToString("dd/MM/yyyy")</td></tr>
+                <tr><td class="text-muted">Số đơn</td><td>@orders.Count</td></tr>
+                <tr><td class="text-muted">Đã chi tiêu</td><td class="fw-semibold">@FormatHelper.Money(totalSpent)</td></tr>
+            </table>
+
+            @if (!isSelf)
+            {
+                <form asp-action="ToggleActive" asp-route-id="@Model.UserId"
+                      asp-route-returnUrl="@Url.Action("Details", new { id = Model.UserId })" method="post"
+                      data-confirm="@(Model.IsActive ? "Khóa" : "Mở khóa") tài khoản này?">
+                    <button class="btn w-100 @(Model.IsActive ? "btn-outline-danger" : "btn-success")">
+                        @(Model.IsActive ? "Khóa tài khoản" : "Mở khóa tài khoản")
+                    </button>
+                </form>
+            }
+        </div>
+
+        <div class="admin-card">
+            <h5>Địa chỉ</h5>
+            @foreach (var a in Model.Addresses)
+            {
+                <div class="border-bottom py-2 small">
+                    <strong>@a.ReceiverName</strong> · @a.Phone
+                    @if (a.IsDefault)
+                    {
+                        <span class="badge bg-dark">Mặc định</span>
+                    }
+                    <div class="text-muted">@a.AddressDetail, @a.Ward, @a.District, @a.Province</div>
+                </div>
+            }
+            @if (Model.Addresses.Count == 0)
+            {
+                <div class="text-muted small">Chưa có địa chỉ</div>
+            }
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="admin-card">
+            <h5>Lịch sử đơn hàng</h5>
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr><th>Mã đơn</th><th>Ngày</th><th class="text-end">Tổng</th><th>Thanh toán</th><th>Trạng thái</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var o in orders)
+                    {
+                        <tr>
+                            <td><a asp-controller="Orders" asp-action="Details" asp-route-id="@o.OrderId">@o.OrderCode</a></td>
+                            <td class="small">@FormatHelper.DateTime(o.CreatedAt)</td>
+                            <td class="text-end">@FormatHelper.Money(o.TotalAmount)</td>
+                            <td class="small">@o.PaymentStatus</td>
+                            <td><span class="badge @OrderStatus.BadgeClass(o.OrderStatus)">@o.OrderStatus</span></td>
+                        </tr>
+                    }
+                    @if (orders.Count == 0)
+                    {
+                        <tr><td colspan="5" class="text-center text-muted">Chưa có đơn hàng</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

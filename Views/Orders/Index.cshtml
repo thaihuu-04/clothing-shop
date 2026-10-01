@@ -1,0 +1,88 @@
+@model PagedList<Order>
+@{
+    ViewData["Title"] = "Đơn hàng của tôi";
+    string? status = ViewBag.Status;
+}
+
+<div class="page-wrapper">
+    <div class="row g-5">
+        <div class="col-lg-3">
+            <partial name="_AccountMenu" model="@("orders")" />
+        </div>
+
+        <div class="col-lg-9">
+            <h1 class="page-title">Đơn hàng của tôi</h1>
+
+            <ul class="nav nav-tabs mb-4">
+                <li class="nav-item">
+                    <a class="nav-link text-dark @(string.IsNullOrEmpty(status) ? "active fw-semibold" : "")" asp-action="Index">Tất cả</a>
+                </li>
+                @foreach (var s in OrderStatus.All)
+                {
+                    <li class="nav-item">
+                        <a class="nav-link text-dark @(status == s ? "active fw-semibold" : "")"
+                           asp-action="Index" asp-route-status="@s">@s</a>
+                    </li>
+                }
+            </ul>
+
+            @if (Model.Items.Count == 0)
+            {
+                <div class="empty-state">
+                    <i class="bi bi-receipt"></i>
+                    <p>Bạn chưa có đơn hàng nào.</p>
+                    <a asp-controller="Products" asp-action="Index" class="btn-shop">Mua sắm ngay</a>
+                </div>
+            }
+
+            @foreach (var order in Model.Items)
+            {
+                var first = order.OrderDetails.FirstOrDefault();
+
+                <div class="shop-card">
+                    <div class="d-flex justify-content-between flex-wrap gap-2 mb-3">
+                        <div>
+                            <strong>@order.OrderCode</strong>
+                            <span class="text-muted small ms-2">@FormatHelper.DateTime(order.CreatedAt)</span>
+                        </div>
+                        <span class="badge @OrderStatus.BadgeClass(order.OrderStatus)">@order.OrderStatus</span>
+                    </div>
+
+                    <div class="d-flex gap-3 align-items-center">
+                        <img src="@(first?.Product?.DisplayImage ?? "/images/no-image.svg")"
+                             style="width:64px;height:80px;object-fit:cover" alt="" />
+                        <div class="flex-grow-1">
+                            <div>@first?.ProductName</div>
+                            @if (order.OrderDetails.Count > 1)
+                            {
+                                <div class="small text-muted">và @(order.OrderDetails.Count - 1) sản phẩm khác</div>
+                            }
+                        </div>
+                        <div class="text-end">
+                            <div class="small text-muted">Tổng tiền</div>
+                            <div class="fw-bold">@FormatHelper.Money(order.TotalAmount)</div>
+                        </div>
+                    </div>
+
+                    <div class="text-end mt-3">
+                        <a asp-action="Details" asp-route-id="@order.OrderId" class="btn btn-sm btn-dark rounded-0">Xem chi tiết</a>
+                    </div>
+                </div>
+            }
+
+            @{
+                var pager = new PagerViewModel
+                {
+                    Page = Model.Page,
+                    TotalPages = Model.TotalPages,
+                    RouteValuesFor = p => new Dictionary<string, string>
+                    {
+                        ["status"] = status ?? "",
+                        ["page"] = p.ToString()
+                    }
+                };
+            }
+            <partial name="_Pager" model="pager" />
+        </div>
+    </div>
+</div>

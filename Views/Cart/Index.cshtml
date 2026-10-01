@@ -1,0 +1,130 @@
+@model CartViewModel
+@{
+    ViewData["Title"] = "Giỏ hàng";
+}
+
+<div class="page-wrapper">
+    <h1 class="page-title">Giỏ hàng <small class="text-muted fs-5">(@Model.TotalQuantity sản phẩm)</small></h1>
+
+    @if (Model.Items.Count == 0)
+    {
+        <div class="empty-state">
+            <i class="bi bi-bag"></i>
+            <p>Giỏ hàng của bạn đang trống.</p>
+            <a asp-controller="Products" asp-action="Index" class="btn-shop">Tiếp tục mua sắm</a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-5">
+            <div class="col-lg-8">
+                <div class="table-responsive">
+                    <table class="table cart-table">
+                        <thead>
+                            <tr class="small text-uppercase text-muted">
+                                <th>Sản phẩm</th>
+                                <th class="text-end">Đơn giá</th>
+                                <th class="text-center">Số lượng</th>
+                                <th class="text-end">Thành tiền</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Items)
+                            {
+                                var p = item.Product;
+                                int maxQty = Math.Min(p.StockQuantity, ShopSettings.MaxQuantityPerItem);
+
+                                <tr>
+                                    <td>
+                                        <div class="d-flex gap-3 align-items-center">
+                                            <img src="@p.DisplayImage" class="cart-thumb" alt="@p.ProductName" />
+                                            <div>
+                                                <a asp-controller="Products" asp-action="Details" asp-route-id="@p.ProductId" class="fw-semibold">
+                                                    @p.ProductName
+                                                </a>
+                                                <div class="small text-muted">@p.Category?.CategoryName @(string.IsNullOrEmpty(p.Color) ? "" : "· " + p.Color)</div>
+
+                                                @if (!p.IsActive)
+                                                {
+                                                    <div class="small text-danger">Sản phẩm đã ngừng bán</div>
+                                                }
+                                                else if (item.Quantity > p.StockQuantity)
+                                                {
+                                                    <div class="small text-danger">Chỉ còn @p.StockQuantity sản phẩm trong kho</div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-end">
+                                        @FormatHelper.Money(item.UnitPrice)
+                                        @if (p.IsOnSale)
+                                        {
+                                            <div class="small product-old-price">@FormatHelper.Money(p.Price)</div>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <form asp-action="Update" method="post" class="d-inline-block">
+                                            <input type="hidden" name="cartItemId" value="@item.CartItemId" />
+                                            <div class="qty-box qty-box-sm">
+                                                <button type="button" class="js-qty-minus">−</button>
+                                                <input type="number" name="quantity" value="@item.Quantity"
+                                                       min="1" max="@Math.Max(maxQty, 1)" class="js-auto-submit" />
+                                                <button type="button" class="js-qty-plus">+</button>
+                                            </div>
+                                        </form>
+                                    </td>
+                                    <td class="text-end fw-semibold">@FormatHelper.Money(item.UnitPrice * item.Quantity)</td>
+                                    <td class="text-end">
+                                        <form asp-action="Remove" method="post">
+                                            <input type="hidden" name="cartItemId" value="@item.CartItemId" />
+                                            <button type="submit" class="btn btn-link text-muted p-0" title="Xóa">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <a asp-controller="Products" asp-action="Index" class="text-muted small">
+                    <i class="bi bi-arrow-left"></i> Tiếp tục mua sắm
+                </a>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="summary-box">
+                    <h5 class="fw-semibold mb-3">Tóm tắt đơn hàng</h5>
+
+                    <div class="summary-row"><span>Tạm tính</span><span>@FormatHelper.Money(Model.SubTotal)</span></div>
+                    <div class="summary-row">
+                        <span>Phí vận chuyển</span>
+                        <span>@(Model.ShippingFee == 0 ? "Miễn phí" : FormatHelper.Money(Model.ShippingFee))</span>
+                    </div>
+
+                    @if (Model.AmountToFreeShipping > 0)
+                    {
+                        <div class="small text-muted">
+                            Mua thêm @FormatHelper.Money(Model.AmountToFreeShipping) để được miễn phí vận chuyển.
+                        </div>
+                    }
+
+                    <div class="summary-row summary-total"><span>Tổng cộng</span><span>@FormatHelper.Money(Model.Total)</span></div>
+
+                    @if (Model.HasInvalidItems)
+                    {
+                        <div class="alert alert-warning small mt-3 mb-0">
+                            Vui lòng điều chỉnh các sản phẩm vượt tồn kho hoặc ngừng bán trước khi thanh toán.
+                        </div>
+                    }
+                    else
+                    {
+                        <a asp-controller="Checkout" asp-action="Index" class="btn-shop w-100 mt-3">TIẾN HÀNH THANH TOÁN</a>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>

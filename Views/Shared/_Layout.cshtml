@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Fashion Store</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    @{
+        var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    }
+
+    <!-- ================= NAVBAR ================= -->
+    <header class="sticky-top">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand fw-bold logo text-white" asp-area="" asp-controller="Home" asp-action="Index">
+                    FASHION STORE
+                </a>
+
+                <button class="navbar-toggler" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="mainNavbar">
+                    <ul class="navbar-nav me-auto ms-lg-4">
+                        <li class="nav-item">
+                            <a class="nav-link @(currentController == "Home" ? "active" : "")"
+                               asp-area="" asp-controller="Home" asp-action="Index">Trang chủ</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(currentController == "Products" ? "active" : "")"
+                               asp-area="" asp-controller="Products" asp-action="Index">Sản phẩm</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Products" asp-action="Index"
+                               asp-route-onSale="true">Khuyến mãi</a>
+                        </li>
+                    </ul>
+
+                    <!-- SEARCH -->
+                    <form class="d-flex me-lg-3 my-2 my-lg-0" method="get"
+                          asp-area="" asp-controller="Products" asp-action="Index">
+                        <input class="form-control form-control-sm" type="search" name="q"
+                               placeholder="Tìm sản phẩm..." value="@Context.Request.Query["q"]" />
+                    </form>
+
+                    <!-- ACCOUNT -->
+                    <div class="d-flex align-items-center gap-2">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            @await Component.InvokeAsync("CartBadge")
+
+                            <div class="dropdown">
+                                <button class="btn btn-outline-light btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+                                    <i class="bi bi-person"></i> @User.GetFullName()
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <li>
+                                            <a class="dropdown-item" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                                                <i class="bi bi-speedometer2 me-2"></i>Trang quản trị
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider" /></li>
+                                    }
+                                    <li>
+                                        <a class="dropdown-item" asp-area="" asp-controller="Profile" asp-action="Index">
+                                            <i class="bi bi-person-circle me-2"></i>Tài khoản của tôi
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="" asp-controller="Orders" asp-action="Index">
+                                            <i class="bi bi-receipt me-2"></i>Đơn hàng của tôi
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="" asp-controller="Profile" asp-action="Addresses">
+                                            <i class="bi bi-geo-alt me-2"></i>Sổ địa chỉ
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li>
+                                        <form asp-area="" asp-controller="Account" asp-action="Logout" method="post">
+                                            <button type="submit" class="dropdown-item text-danger">
+                                                <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        }
+                        else
+                        {
+                            <a class="btn btn-outline-light btn-sm" asp-area="" asp-controller="Account" asp-action="Login">Đăng nhập</a>
+                            <a class="btn btn-light btn-sm" asp-area="" asp-controller="Account" asp-action="Register">Đăng ký</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- ================= ALERTS ================= -->
+    <div id="toast-area" class="toast-area"></div>
+
+    @if (TempData["Success"] != null || TempData["Error"] != null)
+    {
+        <div class="container mt-3">
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show mb-0">
+                    @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show mb-0">
+                    @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+        </div>
+    }
+
+    <!-- ================= CONTENT ================= -->
+    <main>
+        @RenderBody()
+    </main>
+
+    <!-- ================= FOOTER ================= -->
+    <footer class="main-footer mt-5">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div>
+                    <div class="footer-brand">FASHION STORE</div>
+                    <p class="footer-description">
+                        Phong cách của bạn. Cá tính của bạn.
+                        Thời trang hiện đại, chất lượng với giá hợp lý.
+                    </p>
+                </div>
+                <div>
+                    <div class="footer-title">Mua sắm</div>
+                    <a class="footer-link" asp-area="" asp-controller="Products" asp-action="Index">Tất cả sản phẩm</a>
+                    <a class="footer-link" asp-area="" asp-controller="Products" asp-action="Index" asp-route-sort="newest">Hàng mới về</a>
+                    <a class="footer-link" asp-area="" asp-controller="Products" asp-action="Index" asp-route-onSale="true">Khuyến mãi</a>
+                </div>
+                <div>
+                    <div class="footer-title">Tài khoản</div>
+                    <a class="footer-link" asp-area="" asp-controller="Profile" asp-action="Index">Thông tin cá nhân</a>
+                    <a class="footer-link" asp-area="" asp-controller="Orders" asp-action="Index">Đơn hàng</a>
+                    <a class="footer-link" asp-area="" asp-controller="Cart" asp-action="Index">Giỏ hàng</a>
+                </div>
+                <div>
+                    <div class="footer-title">Liên hệ</div>
+                    <span class="footer-link">Hotline: 0123 456 789</span>
+                    <span class="footer-link">support@fashionstore.com</span>
+                    <span class="footer-link">Miễn phí ship đơn từ @FormatHelper.Money(ShopSettings.FreeShippingThreshold)</span>
+                </div>
+            </div>
+            <div class="footer-bottom">© @DateTime.Now.Year Fashion Store. All rights reserved. Ảnh minh hoạ: Unsplash.</div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

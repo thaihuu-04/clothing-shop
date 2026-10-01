@@ -1,0 +1,51 @@
+@model CategoryFormViewModel
+@{
+    bool isEdit = Model.CategoryId > 0;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">@(isEdit ? "Sửa danh mục" : "Thêm danh mục")</h4>
+    <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Quay lại</a>
+</div>
+
+<form asp-action="@(isEdit ? "Edit" : "Create")"
+      asp-route-id="@(isEdit ? Model.CategoryId.ToString() : null)"
+      method="post" enctype="multipart/form-data" class="admin-card" style="max-width:720px">
+
+    <div class="mb-3">
+        <label asp-for="CategoryName" class="form-label"></label>
+        <input asp-for="CategoryName" class="form-control" />
+        <span asp-validation-for="CategoryName" class="text-danger small"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label"></label>
+        <textarea asp-for="Description" rows="3" class="form-control"></textarea>
+    </div>
+
+    <img id="imgPreview" src="@Model.ImageUrl"
+         class="img-preview mb-3 @(string.IsNullOrEmpty(Model.ImageUrl) ? "d-none" : "")" alt="" />
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label asp-for="ImageFile" class="form-label"></label>
+            <input asp-for="ImageFile" type="file" accept=".jpg,.jpeg,.png,.webp" class="form-control" data-preview="#imgPreview" />
+            <span asp-validation-for="ImageFile" class="text-danger small"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="ImageUrl" class="form-label"></label>
+            <input asp-for="ImageUrl" class="form-control" />
+        </div>
+    </div>
+
+    <div class="form-check form-switch mb-4">
+        <input asp-for="IsActive" class="form-check-input" />
+        <label asp-for="IsActive" class="form-check-label"></label>
+    </div>
+
+    <button type="submit" class="btn btn-dark"><i class="bi bi-check-lg"></i> Lưu</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,10 @@
+@model int
+
+<a asp-area="" asp-controller="Cart" asp-action="Index"
+   class="btn btn-outline-light btn-sm position-relative" title="Giỏ hàng">
+    <i class="bi bi-bag"></i>
+    <span id="cart-count"
+          class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger @(Model == 0 ? "d-none" : "")">
+        @Model
+    </span>
+</a>

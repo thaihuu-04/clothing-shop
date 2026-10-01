@@ -1,0 +1,15 @@
+@{
+    int code = (int)(ViewData["Code"] ?? 404);
+    ViewData["Title"] = code == 404 ? "Không tìm thấy trang" : "Có lỗi xảy ra";
+}
+
+<section class="auth-page">
+    <div class="auth-card text-center">
+        <div class="display-3 fw-bold mb-2">@code</div>
+        <h1>@ViewData["Title"]</h1>
+        <p class="text-muted mb-4">
+            @(code == 404 ? "Trang hoặc sản phẩm bạn tìm không tồn tại hoặc đã ngừng bán." : "Vui lòng thử lại sau.")
+        </p>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-dark w-100">Về trang chủ</a>
+    </div>
+</section>

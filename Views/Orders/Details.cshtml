@@ -1,0 +1,88 @@
+@model Order
+@{
+    ViewData["Title"] = "Đơn hàng " + Model.OrderCode;
+
+    var steps = new[] { OrderStatus.Pending, OrderStatus.Confirmed, OrderStatus.Shipping, OrderStatus.Delivered };
+    int currentStep = Array.IndexOf(steps, Model.OrderStatus);
+}
+
+<div class="page-wrapper">
+    <div class="row g-5">
+        <div class="col-lg-3">
+            <partial name="_AccountMenu" model="@("orders")" />
+        </div>
+
+        <div class="col-lg-9">
+            <a asp-action="Index" class="small text-muted"><i class="bi bi-arrow-left"></i> Đơn hàng của tôi</a>
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-2">
+                <h1 class="page-title mb-0">Đơn hàng @Model.OrderCode</h1>
+                <span class="badge fs-6 @OrderStatus.BadgeClass(Model.OrderStatus)">@Model.OrderStatus</span>
+            </div>
+            <div class="text-muted small mb-3">Đặt lúc @FormatHelper.DateTime(Model.CreatedAt)</div>
+
+            @if (Model.OrderStatus == OrderStatus.Cancelled)
+            {
+                <div class="alert alert-secondary">Đơn hàng đã bị hủy.</div>
+            }
+            else
+            {
+                <div class="order-steps">
+                    @for (int i = 0; i < steps.Length; i++)
+                    {
+                        <div class="order-step @(i <= currentStep ? "done" : "")">
+                            <div class="dot">@(i + 1)</div>
+                            @steps[i]
+                        </div>
+                    }
+                </div>
+            }
+
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <div class="shop-card h-100 mb-0">
+                        <h5>Địa chỉ nhận hàng</h5>
+                        @if (Model.Address != null)
+                        {
+                            <div><strong>@Model.Address.ReceiverName</strong> · @Model.Address.Phone</div>
+                            <div class="text-muted small">@Model.Address.AddressDetail, @Model.Address.Ward, @Model.Address.District, @Model.Address.Province</div>
+                        }
+                        else
+                        {
+                            <div class="text-muted">Không có thông tin</div>
+                        }
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="shop-card h-100 mb-0">
+                        <h5>Thanh toán</h5>
+                        <div>@PaymentMethods.DisplayName(Model.PaymentMethod)</div>
+                        <div class="small">
+                            Trạng thái:
+                            <strong class="@(Model.PaymentStatus == PaymentStatus.Paid ? "text-success" : "text-warning")">@Model.PaymentStatus</strong>
+                        </div>
+                        @if (Model.Payment?.PaidAt != null)
+                        {
+                            <div class="small text-muted">Thanh toán lúc @FormatHelper.DateTime(Model.Payment.PaidAt)</div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(Model.Note))
+            {
+                <div class="alert alert-light border"><strong>Ghi chú:</strong> @Model.Note</div>
+            }
+
+            <partial name="_OrderItems" model="Model" />
+
+            @if (Model.OrderStatus == OrderStatus.Pending)
+            {
+                <form asp-action="Cancel" asp-route-id="@Model.OrderId" method="post"
+                      class="text-end" data-confirm="Bạn chắc chắn muốn hủy đơn hàng này?">
+                    <button type="submit" class="btn btn-outline-danger rounded-0">Hủy đơn hàng</button>
+                </form>
+            }
+        </div>
+    </div>
+</div>

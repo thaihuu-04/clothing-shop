@@ -1,0 +1,86 @@
+@model AddressViewModel
+@{
+    bool isEdit = Model.AddressId > 0;
+    ViewData["Title"] = isEdit ? "Sửa địa chỉ" : "Thêm địa chỉ";
+    string action = isEdit ? "EditAddress" : "CreateAddress";
+}
+
+<div class="page-wrapper">
+    <div class="row g-5">
+        <div class="col-lg-3">
+            <partial name="_AccountMenu" model="@("addresses")" />
+        </div>
+
+        <div class="col-lg-9">
+            <h1 class="page-title">@ViewData["Title"]</h1>
+
+            <form asp-action="@action"
+                  asp-route-id="@(isEdit ? Model.AddressId.ToString() : null)"
+                  asp-route-returnUrl="@ViewData["ReturnUrl"]"
+                  method="post" class="shop-card" style="max-width:720px">
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="ReceiverName" class="form-label"></label>
+                        <input asp-for="ReceiverName" class="form-control" />
+                        <span asp-validation-for="ReceiverName" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Phone" class="form-label"></label>
+                        <input asp-for="Phone" class="form-control" />
+                        <span asp-validation-for="Phone" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="Province" class="form-label"></label>
+                        <input asp-for="Province" class="form-control" list="provinces" />
+                        <span asp-validation-for="Province" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="District" class="form-label"></label>
+                        <input asp-for="District" class="form-control" />
+                        <span asp-validation-for="District" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="Ward" class="form-label"></label>
+                        <input asp-for="Ward" class="form-control" />
+                        <span asp-validation-for="Ward" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="AddressDetail" class="form-label"></label>
+                    <input asp-for="AddressDetail" class="form-control" />
+                    <span asp-validation-for="AddressDetail" class="text-danger small"></span>
+                </div>
+
+                <div class="form-check mb-4">
+                    <input asp-for="IsDefault" class="form-check-input" />
+                    <label asp-for="IsDefault" class="form-check-label"></label>
+                </div>
+
+                <button type="submit" class="btn-shop">Lưu địa chỉ</button>
+                <a asp-action="Addresses" class="btn btn-link text-muted">Hủy</a>
+
+                <datalist id="provinces">
+                    <option value="Hà Nội"></option>
+                    <option value="TP. Hồ Chí Minh"></option>
+                    <option value="Đà Nẵng"></option>
+                    <option value="Hải Phòng"></option>
+                    <option value="Cần Thơ"></option>
+                    <option value="Bắc Ninh"></option>
+                    <option value="Hưng Yên"></option>
+                    <option value="Quảng Ninh"></option>
+                    <option value="Khánh Hòa"></option>
+                    <option value="Đồng Nai"></option>
+                </datalist>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

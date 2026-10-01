@@ -1,0 +1,26 @@
+@model PagerViewModel
+
+@if (Model.TotalPages > 1)
+{
+    int start = Math.Max(1, Model.Page - 2);
+    int end = Math.Min(Model.TotalPages, Model.Page + 2);
+
+    <nav class="mt-5">
+        <ul class="pagination justify-content-center shop-pagination">
+            <li class="page-item @(Model.Page == 1 ? "disabled" : "")">
+                <a class="page-link" asp-all-route-data="Model.RouteValuesFor(Model.Page - 1)">&laquo;</a>
+            </li>
+
+            @for (int i = start; i <= end; i++)
+            {
+                <li class="page-item @(i == Model.Page ? "active" : "")">
+                    <a class="page-link" asp-all-route-data="Model.RouteValuesFor(i)">@i</a>
+                </li>
+            }
+
+            <li class="page-item @(Model.Page == Model.TotalPages ? "disabled" : "")">
+                <a class="page-link" asp-all-route-data="Model.RouteValuesFor(Model.Page + 1)">&raquo;</a>
+            </li>
+        </ul>
+    </nav>
+}

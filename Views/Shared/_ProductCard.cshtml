@@ -1,0 +1,57 @@
+@model Product
+
+<div class="product-item">
+    <a asp-area="" asp-controller="Products" asp-action="Details" asp-route-id="@Model.ProductId">
+        <div class="product-image-wrapper">
+            @if (Model.StockQuantity <= 0)
+            {
+                <span class="product-badge bg-secondary">HẾT HÀNG</span>
+            }
+            else if (Model.IsOnSale)
+            {
+                <span class="product-badge bg-danger">-@Model.DiscountPercent%</span>
+            }
+            else if (Model.IsFeatured)
+            {
+                <span class="product-badge">BEST SELLER</span>
+            }
+
+            <img src="@Model.DisplayImage" alt="@Model.ProductName" loading="lazy" />
+        </div>
+    </a>
+
+    <div class="product-info">
+        <div class="product-category">@Model.Category?.CategoryName</div>
+
+        <a asp-area="" asp-controller="Products" asp-action="Details" asp-route-id="@Model.ProductId">
+            <div class="product-name">@Model.ProductName</div>
+        </a>
+
+        <div class="product-price">
+            <span class="product-current-price @(Model.IsOnSale ? "text-danger" : "")">
+                @FormatHelper.Money(Model.FinalPrice)
+            </span>
+            @if (Model.IsOnSale)
+            {
+                <span class="product-old-price">@FormatHelper.Money(Model.Price)</span>
+            }
+        </div>
+
+        <div class="product-action">
+            @if (Model.StockQuantity > 0)
+            {
+                <form asp-area="" asp-controller="Cart" asp-action="Add" method="post" class="js-add-to-cart">
+                    <input type="hidden" name="productId" value="@Model.ProductId" />
+                    <input type="hidden" name="quantity" value="1" />
+                    <button type="submit" class="product-action-btn">
+                        <i class="bi bi-bag-plus me-1"></i> THÊM VÀO GIỎ
+                    </button>
+                </form>
+            }
+            else
+            {
+                <button type="button" class="product-action-btn" disabled>TẠM HẾT HÀNG</button>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,21 @@
+@model string
+@* Model: mục đang chọn (profile | password | addresses | orders) *@
+
+<div class="account-menu">
+    <div class="mb-3">
+        <div class="small text-muted">Xin chào,</div>
+        <div class="fw-semibold fs-5">@User.GetFullName()</div>
+    </div>
+    <a asp-controller="Profile" asp-action="Index" class="@(Model == "profile" ? "active" : "")">
+        <i class="bi bi-person me-2"></i>Thông tin cá nhân
+    </a>
+    <a asp-controller="Orders" asp-action="Index" class="@(Model == "orders" ? "active" : "")">
+        <i class="bi bi-receipt me-2"></i>Đơn hàng của tôi
+    </a>
+    <a asp-controller="Profile" asp-action="Addresses" class="@(Model == "addresses" ? "active" : "")">
+        <i class="bi bi-geo-alt me-2"></i>Sổ địa chỉ
+    </a>
+    <a asp-controller="Profile" asp-action="ChangePassword" class="@(Model == "password" ? "active" : "")">
+        <i class="bi bi-key me-2"></i>Đổi mật khẩu
+    </a>
+</div>

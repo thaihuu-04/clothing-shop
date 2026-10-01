@@ -1,0 +1,72 @@
+# =========================================================
+# .NET / Visual Studio
+# =========================================================
+
+# Build output
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Ll]og/
+[Ll]ogs/
+out/
+publish/
+*.pubxml
+*.publishproj
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.rsuser
+
+# Rider / VS Code
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# NuGet
+*.nupkg
+*.snupkg
+**/packages/*
+!**/packages/build/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Test results / coverage
+[Tt]est[Rr]esult*/
+*.trx
+coverage*.json
+coverage*.xml
+*.coverage
+
+# Temp / cache
+*.tmp
+*.cache
+*.log
+*.swp
+~$*
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# =========================================================
+# Project specific
+# =========================================================
+
+# Ảnh do admin upload lúc chạy (ảnh mẫu trong wwwroot/images vẫn được commit)
+wwwroot/images/**/up-*
+
+# Cấu hình bí mật cục bộ (nếu tách ra sau này)
+appsettings.Local.json
+*.secrets.json

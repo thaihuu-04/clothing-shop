@@ -1,0 +1,146 @@
+@model HomeViewModel
+@{
+    ViewData["Title"] = "Trang chủ";
+}
+
+<!-- ================= HERO ================= -->
+<section class="hero-section">
+    <div class="hero-content">
+        <div class="hero-small">New Collection @DateTime.Now.Year</div>
+        <h1 class="hero-title">Elevate<br />Your Style</h1>
+        <p class="hero-description">
+            Khám phá bộ sưu tập thời trang hiện đại, tinh tế và dành riêng cho phong cách của bạn.
+        </p>
+        <div class="hero-buttons">
+            <a asp-controller="Products" asp-action="Index" class="hero-btn hero-btn-black">Mua sắm ngay</a>
+            <a href="#featured" class="hero-btn hero-btn-outline">Khám phá</a>
+        </div>
+    </div>
+</section>
+
+<!-- ================= CATEGORIES ================= -->
+@if (Model.Categories.Count > 0)
+{
+    <section class="section">
+        <div class="section-container">
+            <div class="section-heading">
+                <div class="section-label">Shop by category</div>
+                <h2>Khám phá phong cách</h2>
+                <p>Những thiết kế được lựa chọn dành cho bạn</p>
+            </div>
+
+            <div class="category-grid category-grid-auto">
+                @foreach (var c in Model.Categories)
+                {
+                    <a asp-controller="Products" asp-action="Index" asp-route-categoryId="@c.CategoryId" class="category-card">
+                        <img src="@(string.IsNullOrEmpty(c.ImageUrl) ? "/images/no-image.svg" : c.ImageUrl)" alt="@c.CategoryName" loading="lazy" />
+                        <div class="category-overlay">
+                            <div>
+                                <h3>@c.CategoryName</h3>
+                                <span>Khám phá ngay →</span>
+                            </div>
+                        </div>
+                    </a>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+<!-- ================= FEATURED ================= -->
+@if (Model.FeaturedProducts.Count > 0)
+{
+    <section id="featured" class="section pt-0">
+        <div class="section-container">
+            <div class="section-heading">
+                <div class="section-label">Our collection</div>
+                <h2>Sản phẩm nổi bật</h2>
+                <p>Những sản phẩm được yêu thích nhất</p>
+            </div>
+
+            <div class="product-grid">
+                @foreach (var p in Model.FeaturedProducts)
+                {
+                    <partial name="_ProductCard" model="p" />
+                }
+            </div>
+        </div>
+    </section>
+}
+
+<!-- ================= PROMOTION ================= -->
+<section class="promo-banner">
+    <div class="promo-content">
+        <div class="section-label text-white-50">Special offer</div>
+        <h2>New season<br /><strong>Giảm đến 30%</strong></h2>
+        <p>Ưu đãi đặc biệt cho bộ sưu tập mới. Số lượng có hạn.</p>
+        <a asp-controller="Products" asp-action="Index" asp-route-onSale="true" class="hero-btn hero-btn-black">Xem khuyến mãi</a>
+    </div>
+</section>
+
+<!-- ================= SALE ================= -->
+@if (Model.SaleProducts.Count > 0)
+{
+    <section class="section">
+        <div class="section-container">
+            <div class="section-heading">
+                <div class="section-label">Hot deals</div>
+                <h2>Đang giảm giá</h2>
+            </div>
+
+            <div class="product-grid">
+                @foreach (var p in Model.SaleProducts)
+                {
+                    <partial name="_ProductCard" model="p" />
+                }
+            </div>
+        </div>
+    </section>
+}
+
+<!-- ================= NEW ================= -->
+@if (Model.NewProducts.Count > 0)
+{
+    <section class="section pt-0">
+        <div class="section-container">
+            <div class="section-heading">
+                <div class="section-label">Just arrived</div>
+                <h2>Hàng mới về</h2>
+            </div>
+
+            <div class="product-grid">
+                @foreach (var p in Model.NewProducts)
+                {
+                    <partial name="_ProductCard" model="p" />
+                }
+            </div>
+
+            <div class="text-center mt-5">
+                <a asp-controller="Products" asp-action="Index" class="hero-btn border border-dark">Xem tất cả sản phẩm</a>
+            </div>
+        </div>
+    </section>
+}
+
+<!-- ================= FEATURES ================= -->
+<section class="section feature-section">
+    <div class="section-container">
+        <div class="feature-grid">
+            <div class="feature">
+                <div class="feature-icon"><i class="bi bi-truck"></i></div>
+                <h3>Giao hàng toàn quốc</h3>
+                <p>Miễn phí cho đơn từ @FormatHelper.Money(ShopSettings.FreeShippingThreshold)</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon"><i class="bi bi-arrow-repeat"></i></div>
+                <h3>Đổi trả dễ dàng</h3>
+                <p>Hỗ trợ đổi trả trong 7 ngày</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon"><i class="bi bi-headset"></i></div>
+                <h3>Hỗ trợ khách hàng</h3>
+                <p>Luôn sẵn sàng hỗ trợ bạn</p>
+            </div>
+        </div>
+    </div>
+</section>

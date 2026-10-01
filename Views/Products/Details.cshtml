@@ -1,0 +1,137 @@
+@model ProductDetailViewModel
+@{
+    var p = Model.Product;
+    ViewData["Title"] = p.ProductName;
+    int maxQty = Math.Min(p.StockQuantity, ShopSettings.MaxQuantityPerItem);
+}
+
+<section class="detail-page">
+    <div class="detail-container">
+
+        <nav class="small mb-4">
+            <a asp-controller="Home" asp-action="Index" class="text-muted">Trang chủ</a> /
+            <a asp-action="Index" class="text-muted">Sản phẩm</a> /
+            <a asp-action="Index" asp-route-categoryId="@p.CategoryId" class="text-muted">@p.Category.CategoryName</a> /
+            <span>@p.ProductName</span>
+        </nav>
+
+        <div class="detail-grid">
+            <div class="detail-image">
+                <img src="@p.DisplayImage" alt="@p.ProductName" />
+            </div>
+
+            <div class="detail-info">
+                <div class="detail-category">
+                    @p.Category.CategoryName
+                    @if (p.Brand != null)
+                    {
+                        <span> · @p.Brand.BrandName</span>
+                    }
+                </div>
+
+                <h1 class="detail-title">@p.ProductName</h1>
+
+                <div class="detail-price">
+                    <span class="@(p.IsOnSale ? "text-danger" : "")">@FormatHelper.Money(p.FinalPrice)</span>
+                    @if (p.IsOnSale)
+                    {
+                        <span class="detail-old-price">@FormatHelper.Money(p.Price)</span>
+                        <span class="badge bg-danger ms-2 align-middle">-@p.DiscountPercent%</span>
+                    }
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(p.Description))
+                {
+                    <div class="detail-description">@p.Description</div>
+                }
+
+                <div class="detail-specs">
+                    @if (p.GetSizes().Any())
+                    {
+                        <div class="spec-row">
+                            <span>Kích cỡ</span>
+                            <span class="d-flex gap-1 flex-wrap justify-content-end">
+                                @foreach (var size in p.GetSizes())
+                                {
+                                    <span class="size-chip">@size</span>
+                                }
+                            </span>
+                        </div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(p.Color))
+                    {
+                        <div class="spec-row"><span>Màu sắc</span><strong>@p.Color</strong></div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(p.Material))
+                    {
+                        <div class="spec-row"><span>Chất liệu</span><strong>@p.Material</strong></div>
+                    }
+                    <div class="spec-row">
+                        <span>Tình trạng</span>
+                        @if (p.StockQuantity <= 0)
+                        {
+                            <strong class="text-danger">Hết hàng</strong>
+                        }
+                        else if (p.StockQuantity <= ShopSettings.LowStockThreshold)
+                        {
+                            <strong class="text-warning">Chỉ còn @p.StockQuantity sản phẩm</strong>
+                        }
+                        else
+                        {
+                            <strong class="text-success">Còn hàng</strong>
+                        }
+                    </div>
+                </div>
+
+                @if (p.StockQuantity > 0)
+                {
+                    <form asp-controller="Cart" asp-action="Add" method="post" class="js-add-to-cart">
+                        <input type="hidden" name="productId" value="@p.ProductId" />
+
+                        <div class="d-flex gap-3 align-items-stretch">
+                            <div class="qty-box">
+                                <button type="button" class="js-qty-minus">−</button>
+                                <input type="number" name="quantity" value="1" min="1" max="@maxQty" class="js-qty-input" />
+                                <button type="button" class="js-qty-plus">+</button>
+                            </div>
+                            <button type="submit" class="add-cart-btn">
+                                <i class="bi bi-bag-plus me-2"></i>THÊM VÀO GIỎ HÀNG
+                            </button>
+                        </div>
+                    </form>
+
+                    <form asp-controller="Cart" asp-action="BuyNow" method="post" class="mt-2">
+                        <input type="hidden" name="productId" value="@p.ProductId" />
+                        <input type="hidden" name="quantity" value="1" class="js-buy-now-qty" />
+                        <button type="submit" class="buy-now-btn">MUA NGAY</button>
+                    </form>
+                }
+                else
+                {
+                    <button class="add-cart-btn" disabled>TẠM HẾT HÀNG</button>
+                }
+
+                <ul class="detail-policy">
+                    <li><i class="bi bi-truck"></i> Miễn phí giao hàng cho đơn từ @FormatHelper.Money(ShopSettings.FreeShippingThreshold)</li>
+                    <li><i class="bi bi-arrow-repeat"></i> Đổi trả trong 7 ngày</li>
+                    <li><i class="bi bi-cash-coin"></i> Thanh toán khi nhận hàng (COD)</li>
+                </ul>
+            </div>
+        </div>
+
+        @if (Model.RelatedProducts.Count > 0)
+        {
+            <div class="section-heading mt-5 pt-5">
+                <div class="section-label">You may also like</div>
+                <h2>Sản phẩm liên quan</h2>
+            </div>
+
+            <div class="product-grid">
+                @foreach (var item in Model.RelatedProducts)
+                {
+                    <partial name="_ProductCard" model="item" />
+                }
+            </div>
+        }
+    </div>
+</section>

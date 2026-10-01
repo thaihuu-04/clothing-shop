@@ -1,0 +1,110 @@
+@model ProductListViewModel
+@{
+    ViewData["Title"] = "Sản phẩm";
+    var f = Model.Filter;
+    var currentCategory = Model.Categories.FirstOrDefault(c => c.CategoryId == f.CategoryId);
+    string heading = f.OnSale ? "Khuyến mãi"
+        : currentCategory?.CategoryName ?? "Tất cả sản phẩm";
+}
+
+<section class="products-page">
+    <div class="section-container">
+
+        <div class="products-header">
+            <div class="section-label">Fashion Store Collection</div>
+            <h1>@heading</h1>
+            @if (!string.IsNullOrWhiteSpace(f.Q))
+            {
+                <p>Kết quả tìm kiếm cho "<strong>@f.Q</strong>" — @Model.Products.TotalCount sản phẩm</p>
+            }
+            else
+            {
+                <p>@Model.Products.TotalCount sản phẩm</p>
+            }
+        </div>
+
+        <!-- Danh mục nhanh -->
+        <div class="category-filter">
+            <a asp-action="Index" class="@(f.CategoryId == null && !f.OnSale ? "active" : "")">Tất cả</a>
+            @foreach (var c in Model.Categories)
+            {
+                <a asp-action="Index" asp-route-categoryId="@c.CategoryId"
+                   class="@(f.CategoryId == c.CategoryId ? "active" : "")">@c.CategoryName</a>
+            }
+            <a asp-action="Index" asp-route-onSale="true" class="@(f.OnSale ? "active" : "")">Khuyến mãi</a>
+        </div>
+
+        <div class="row g-5">
+            <!-- BỘ LỌC -->
+            <aside class="col-lg-3">
+                <form method="get" asp-action="Index" class="filter-box">
+                    <input type="hidden" name="categoryId" value="@f.CategoryId" />
+                    @if (f.OnSale)
+                    {
+                        <input type="hidden" name="onSale" value="true" />
+                    }
+
+                    <div class="filter-title">Tìm kiếm</div>
+                    <input type="search" name="q" value="@f.Q" class="form-control mb-4" placeholder="Tên sản phẩm..." />
+
+                    <div class="filter-title">Thương hiệu</div>
+                    <select name="brandId" class="form-select mb-4">
+                        <option value="">Tất cả</option>
+                        @foreach (var b in Model.Brands)
+                        {
+                            <option value="@b.BrandId" selected="@(f.BrandId == b.BrandId)">@b.BrandName</option>
+                        }
+                    </select>
+
+                    <div class="filter-title">Khoảng giá (đ)</div>
+                    <div class="d-flex gap-2 mb-4">
+                        <input type="number" name="minPrice" value="@f.MinPrice?.ToString("0")" min="0" step="10000"
+                               class="form-control" placeholder="Từ" />
+                        <input type="number" name="maxPrice" value="@f.MaxPrice?.ToString("0")" min="0" step="10000"
+                               class="form-control" placeholder="Đến" />
+                    </div>
+
+                    <div class="filter-title">Sắp xếp</div>
+                    <select name="sort" class="form-select mb-4">
+                        @foreach (var opt in ProductListViewModel.SortOptions)
+                        {
+                            <option value="@opt.Key" selected="@((f.Sort ?? "newest") == opt.Key)">@opt.Value</option>
+                        }
+                    </select>
+
+                    <button type="submit" class="btn btn-dark w-100 rounded-0">Áp dụng</button>
+                    <a asp-action="Index" class="btn btn-link w-100 text-muted mt-1">Xóa bộ lọc</a>
+                </form>
+            </aside>
+
+            <!-- DANH SÁCH -->
+            <div class="col-lg-9">
+                @if (Model.Products.Items.Count == 0)
+                {
+                    <div class="empty-state">
+                        <i class="bi bi-search"></i>
+                        <p>Không tìm thấy sản phẩm phù hợp.</p>
+                        <a asp-action="Index" class="btn btn-dark rounded-0">Xem tất cả sản phẩm</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="product-grid grid-3">
+                        @foreach (var product in Model.Products.Items)
+                        {
+                            <partial name="_ProductCard" model="product" />
+                        }
+                    </div>
+
+                    var pager = new PagerViewModel
+                    {
+                        Page = Model.Products.Page,
+                        TotalPages = Model.Products.TotalPages,
+                        RouteValuesFor = p => f.ToRouteValues(p)
+                    };
+                    <partial name="_Pager" model="pager" />
+                }
+            </div>
+        </div>
+    </div>
+</section>

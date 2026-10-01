@@ -1,0 +1,49 @@
+@model Order
+@{
+    decimal subTotal = Model.OrderDetails.Sum(d => d.UnitPrice * d.Quantity);
+    decimal shipping = Model.TotalAmount - subTotal;
+}
+
+<div class="table-responsive">
+    <table class="table align-middle">
+        <thead>
+            <tr class="small text-uppercase text-muted">
+                <th>Sản phẩm</th>
+                <th class="text-end">Đơn giá</th>
+                <th class="text-center">SL</th>
+                <th class="text-end">Thành tiền</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var d in Model.OrderDetails)
+            {
+                <tr>
+                    <td>
+                        <div class="d-flex gap-3 align-items-center">
+                            <img src="@(d.Product?.DisplayImage ?? "/images/no-image.svg")"
+                                 style="width:56px;height:70px;object-fit:cover" alt="" />
+                            <span>@d.ProductName</span>
+                        </div>
+                    </td>
+                    <td class="text-end">@FormatHelper.Money(d.UnitPrice)</td>
+                    <td class="text-center">@d.Quantity</td>
+                    <td class="text-end">@FormatHelper.Money(d.UnitPrice * d.Quantity)</td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3" class="text-end">Tạm tính</td>
+                <td class="text-end">@FormatHelper.Money(subTotal)</td>
+            </tr>
+            <tr>
+                <td colspan="3" class="text-end">Phí vận chuyển</td>
+                <td class="text-end">@(shipping <= 0 ? "Miễn phí" : FormatHelper.Money(shipping))</td>
+            </tr>
+            <tr class="fw-bold fs-5">
+                <td colspan="3" class="text-end">Tổng cộng</td>
+                <td class="text-end">@FormatHelper.Money(Model.TotalAmount)</td>
+            </tr>
+        </tfoot>
+    </table>
+</div>

@@ -1,0 +1,113 @@
+@model CheckoutViewModel
+@{
+    ViewData["Title"] = "Thanh toán";
+}
+
+<div class="page-wrapper">
+    <h1 class="page-title">Thanh toán</h1>
+
+    <form asp-action="Index" method="post">
+        <div asp-validation-summary="All" class="alert alert-danger"></div>
+
+        <div class="row g-5">
+            <div class="col-lg-7">
+
+                <!-- ĐỊA CHỈ -->
+                <div class="shop-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">1. Địa chỉ giao hàng</h5>
+                        <a asp-controller="Profile" asp-action="CreateAddress" asp-route-returnUrl="/Checkout" class="small">
+                            <i class="bi bi-plus-lg"></i> Thêm địa chỉ mới
+                        </a>
+                    </div>
+
+                    @if (Model.Addresses.Count == 0)
+                    {
+                        <div class="text-muted">
+                            Bạn chưa có địa chỉ giao hàng.
+                            <a asp-controller="Profile" asp-action="CreateAddress" asp-route-returnUrl="/Checkout"
+                               class="fw-semibold text-decoration-underline">Thêm địa chỉ ngay</a>
+                        </div>
+                    }
+
+                    @foreach (var a in Model.Addresses)
+                    {
+                        <label class="address-option">
+                            <input type="radio" name="AddressId" value="@a.AddressId"
+                                   checked="@(Model.AddressId == a.AddressId)" class="form-check-input me-2" />
+                            <strong>@a.ReceiverName</strong> · @a.Phone
+                            @if (a.IsDefault)
+                            {
+                                <span class="badge bg-dark ms-1">Mặc định</span>
+                            }
+                            <div class="small text-muted ms-4">
+                                @a.AddressDetail, @a.Ward, @a.District, @a.Province
+                            </div>
+                        </label>
+                    }
+                </div>
+
+                <!-- THANH TOÁN -->
+                <div class="shop-card">
+                    <h5>2. Phương thức thanh toán</h5>
+
+                    @foreach (var method in PaymentMethods.All)
+                    {
+                        <label class="address-option">
+                            <input type="radio" name="PaymentMethod" value="@method"
+                                   checked="@(Model.PaymentMethod == method)" class="form-check-input me-2" />
+                            @PaymentMethods.DisplayName(method)
+                            @if (method == PaymentMethods.BankTransfer)
+                            {
+                                <div class="small text-muted ms-4">
+                                    Chuyển khoản tới STK 0123456789 - Ngân hàng ABC - FASHION STORE,
+                                    nội dung: mã đơn hàng. Đơn được xác nhận sau khi nhận được tiền.
+                                </div>
+                            }
+                        </label>
+                    }
+                </div>
+
+                <!-- GHI CHÚ -->
+                <div class="shop-card">
+                    <h5>3. Ghi chú</h5>
+                    <textarea asp-for="Note" rows="3" class="form-control"
+                              placeholder="Ví dụ: giao giờ hành chính, gọi trước khi giao, size mong muốn..."></textarea>
+                    <span asp-validation-for="Note" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="summary-box">
+                    <h5 class="fw-semibold mb-3">Đơn hàng (@Model.Cart.TotalQuantity sản phẩm)</h5>
+
+                    @foreach (var item in Model.Cart.Items)
+                    {
+                        <div class="d-flex gap-3 mb-3 align-items-center">
+                            <img src="@item.Product.DisplayImage" class="cart-thumb" style="width:60px;height:75px" alt="" />
+                            <div class="flex-grow-1 small">
+                                <div class="fw-semibold">@item.Product.ProductName</div>
+                                <div class="text-muted">x @item.Quantity</div>
+                            </div>
+                            <div class="small fw-semibold">@FormatHelper.Money(item.UnitPrice * item.Quantity)</div>
+                        </div>
+                    }
+
+                    <div class="summary-row"><span>Tạm tính</span><span>@FormatHelper.Money(Model.Cart.SubTotal)</span></div>
+                    <div class="summary-row">
+                        <span>Phí vận chuyển</span>
+                        <span>@(Model.Cart.ShippingFee == 0 ? "Miễn phí" : FormatHelper.Money(Model.Cart.ShippingFee))</span>
+                    </div>
+                    <div class="summary-row summary-total"><span>Tổng cộng</span><span>@FormatHelper.Money(Model.Cart.Total)</span></div>
+
+                    <button type="submit" class="btn-shop w-100 mt-3" disabled="@(Model.Addresses.Count == 0)">
+                        ĐẶT HÀNG
+                    </button>
+                    <a asp-controller="Cart" asp-action="Index" class="d-block text-center small text-muted mt-3">
+                        <i class="bi bi-arrow-left"></i> Quay lại giỏ hàng
+                    </a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
